@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Funpay • Сделки</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{box-sizing:border-box}
+:root{--blue:#1687ff;--blue2:#0878ef;--text:#111827;--muted:#6b7280;--line:#e8edf3;--soft:#f6f9fc;--danger:#ef4444;--ok:#16a34a}
+html,body{margin:0;min-height:100%;background:#fff}
+body{padding:14px 14px 28px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:var(--text);-webkit-font-smoothing:antialiased}
+.wrap{width:100%;max-width:560px;margin:auto}
+.top{text-align:center;padding:10px 8px 18px}
+.logo{width:62px;height:62px;margin:auto auto 12px;border-radius:20px;display:flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--line);box-shadow:0 8px 24px rgba(20,55,90,.08);font-size:30px}
+h1{margin:0;font-size:27px;font-weight:800}.subtitle{margin:7px auto 0;max-width:420px;color:var(--muted);font-size:14px;line-height:1.45}
+.card{background:#fff;border:1px solid var(--line);border-radius:24px;padding:17px;box-shadow:0 10px 30px rgba(20,55,90,.07)}
+.info{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:17px}.info-item{background:var(--soft);border-radius:15px;padding:11px 6px;text-align:center}.info-icon{font-size:20px}.info-title{font-size:11px;color:var(--muted);margin-top:3px}
+.section-title{margin:4px 2px 12px;font-size:18px;font-weight:800}
+.grid{display:grid;gap:10px}button{width:100%;border:0;border-radius:17px;padding:15px 16px;min-height:58px;font-size:16px;font-weight:750;cursor:pointer;color:#fff;background:linear-gradient(135deg,var(--blue),var(--blue2));box-shadow:0 7px 18px rgba(22,135,255,.20);transition:.12s}
+button:active{transform:scale(.985);opacity:.88}button.secondary{color:var(--text);background:#fff;border:1px solid var(--line);box-shadow:none}
+button.danger{background:#fff;color:var(--danger);border:1px solid #fee2e2;box-shadow:none}.button-row{display:flex;align-items:center;gap:12px;text-align:left}.button-icon{width:38px;height:38px;flex:0 0 38px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:rgba(255,255,255,.18);font-size:20px}.secondary .button-icon{background:var(--soft)}
+.button-text{display:flex;flex-direction:column;gap:2px}.button-title{font-size:16px;font-weight:800}.button-desc{font-size:12px;font-weight:500;opacity:.82}.secondary .button-desc{color:var(--muted);opacity:1}
+.form{display:grid;gap:12px}.field{display:grid;gap:6px}.field label{font-size:13px;font-weight:700}.field input,.field textarea,.field select{width:100%;border:1px solid var(--line);border-radius:13px;padding:13px 12px;font-size:16px;outline:0;background:#fff}.field textarea{min-height:100px;resize:vertical}.field input:focus,.field textarea:focus,.field select:focus{border-color:#9bcaff}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:9px}.currency{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.currency button{min-height:46px;padding:8px;border-radius:12px;box-shadow:none}.currency button.active{outline:3px solid #b9dcff}
+.back{background:var(--soft);color:var(--text);box-shadow:none;margin-bottom:10px}.deal{border:1px solid var(--line);border-radius:17px;padding:14px;margin-bottom:10px}.deal-head{display:flex;justify-content:space-between;gap:10px}.deal-title{font-weight:800}.status{font-size:12px;background:var(--soft);padding:5px 8px;border-radius:9px;white-space:nowrap}.muted{color:var(--muted);font-size:13px}.code{font-size:22px;font-weight:900;letter-spacing:2px;text-align:center;padding:14px;background:var(--soft);border-radius:14px;margin:12px 0}
+.actions{display:grid;gap:9px;margin-top:13px}.links{word-break:break-all;font-size:13px;line-height:1.5}.notice{padding:12px;border-radius:13px;background:#f8fbff;border:1px solid #e6f1ff;color:#536274;font-size:12px;line-height:1.45}.error{color:#b91c1c;background:#fef2f2;border-color:#fecaca}.ok{color:#166534;background:#f0fdf4;border-color:#bbf7d0}
+.hidden{display:none!important}.footer{text-align:center;color:#9aa3af;font-size:12px;padding:16px 5px 0}
+.spinner{text-align:center;padding:35px;color:var(--muted)}.file{font-size:13px}
+@media(max-width:380px){body{padding-left:10px;padding-right:10px}.card{padding:14px}.row2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<header class="top">
+<div class="logo">💎</div><h1>Funpay</h1>
+<div class="subtitle">Безопасные сделки с подарками и цифровыми активами</div>
+</header>
+<section class="card" id="app"><div class="spinner">Загрузка…</div></section>
+<div class="footer">Funpay • Сервис сделок</div>
+</main>
+<script>
+const tg=window.Telegram.WebApp; tg.ready(); tg.expand();
+const BACKEND_URL="https://funpay-miniapp-production-5567.up.railway.app";
+const app=document.getElementById("app");
+let state={currency:"UAH",deal:null};
+
+function h(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));}
+function initData(){return tg.initData||""}
+async function api(path,options={}) {
+  if(!BACKEND_URL) throw new Error("Не указан адрес backend. Открой index.html и задай FUNPAY_BACKEND_URL.");
+  options.headers=Object.assign({"Content-Type":"application/json","X-Telegram-Init-Data":initData()},options.headers||{});
+  const r=await fetch(BACKEND_URL+path,options);
+  const data=await r.json().catch(()=>({detail:"Ошибка сервера"}));
+  if(!r.ok) throw new Error(data.detail||"Ошибка сервера");
+  return data;
+}
+function screen(html){app.innerHTML=html; window.scrollTo(0,0)}
+function home(){
+screen(`<div class="info"><div class="info-item"><div class="info-icon">⚡</div><div class="info-title">Быстро</div></div><div class="info-item"><div class="info-icon">🛡️</div><div class="info-title">Безопасно</div></div><div class="info-item"><div class="info-icon">💬</div><div class="info-title">Поддержка</div></div></div>
+<div class="section-title">Что хотите сделать?</div><div class="grid">
+<button onclick="createScreen()"><span class="button-row"><span class="button-icon">💎</span><span class="button-text"><span class="button-title">Создать сделку</span><span class="button-desc">Оформить новую сделку</span></span></span></button>
+<button onclick="joinScreen()"><span class="button-row"><span class="button-icon">🔑</span><span class="button-text"><span class="button-title">Войти в сделку</span><span class="button-desc">Подключиться по коду</span></span></span></button>
+<button class="secondary" onclick="myDeals()"><span class="button-row"><span class="button-icon">📋</span><span class="button-text"><span class="button-title">Мои сделки</span><span class="button-desc">Посмотреть сделки</span></span></span></button>
+</div><div class="notice" style="margin-top:14px">🔒 Все этапы сделки проходят прямо здесь, в Mini App.</div>`);
+}
+function createScreen(){
+screen(`<button class="back" onclick="home()">← Назад</button><div class="section-title">💎 Создание сделки</div>
+<form class="form" onsubmit="createDeal(event)">
+<div class="field"><label>Валюта</label><div class="currency">${["UAH","RUB","BYN","KZT","KGS","TJS","STARS"].map(x=>`<button type="button" class="${state.currency===x?"active":""}" onclick="pickCurrency('${x}',this)">${x}</button>`).join("")}</div></div>
+<div class="field"><label>Сумма</label><input id="price" inputmode="decimal" placeholder="${state.currency==="STARS"?"Например 100":"Например 2500"}" required></div>
+<div class="field"><label>${state.currency==="STARS"?"Username для выплаты":"Реквизиты для выплаты"}</label><input id="seller_card" placeholder="${state.currency==="STARS"?"@username":"Номер карты или телефона"}" required></div>
+<div class="field"><label>Ссылки на NFT-подарки</label><textarea id="nft_links" placeholder="t.me/nft/...\nЕсли несколько — по одной на строку" required></textarea></div>
+<button type="submit">✅ Создать сделку</button></form>`);
+}
+function pickCurrency(x,el){state.currency=x;document.querySelectorAll(".currency button").forEach(b=>b.classList.remove("active"));el.classList.add("active");document.getElementById("price").placeholder=x==="STARS"?"Например 100":"Например 2500";document.querySelector(".field:nth-child(3) label").textContent=x==="STARS"?"Username для выплаты":"Реквизиты для выплаты";document.getElementById("seller_card").placeholder=x==="STARS"?"@username":"Номер карты или телефона";}
+async function createDeal(e){e.preventDefault();const b=e.submitter;b.disabled=true;
+try{const d=await api("/api/deals",{method:"POST",body:JSON.stringify({currency:state.currency,price:document.getElementById("price").value.trim(),seller_card:document.getElementById("seller_card").value.trim(),nft_links:document.getElementById("nft_links").value.trim()})});showDeal(d)}catch(err){alert(err.message)}finally{b.disabled=false}}
+function joinScreen(){screen(`<button class="back" onclick="home()">← Назад</button><div class="section-title">🔑 Войти в сделку</div><form class="form" onsubmit="joinDeal(event)"><div class="field"><label>Код сделки</label><input id="code" autocapitalize="characters" placeholder="Например A8F3K92" required></div><button type="submit">🔓 Найти сделку</button></form>`)}
+async function joinDeal(e){e.preventDefault();try{const d=await api("/api/deals/join",{method:"POST",body:JSON.stringify({code:document.getElementById("code").value.trim().toUpperCase()})});showDeal(d)}catch(err){alert(err.message)}}
+async function myDeals(){screen(`<button class="back" onclick="home()">← Назад</button><div class="section-title">📋 Мои сделки</div><div class="spinner">Загрузка…</div>`);try{const d=await api("/api/deals");screen(`<button class="back" onclick="home()">← Назад</button><div class="section-title">📋 Мои сделки</div>${d.deals.length?d.deals.map(x=>`<div class="deal" onclick="loadDeal(${x.id})"><div class="deal-head"><div class="deal-title">#${x.id} • ${h(x.nft)}</div><div class="status">${h(x.status_text)}</div></div><div class="muted">${h(x.price)} ${h(x.currency)}</div></div>`).join(""):`<div class="notice">📭 У тебя пока нет сделок.</div>`}`)}catch(err){screen(`<div class="notice error">${h(err.message)}</div>`)}} 
+async function loadDeal(id){try{showDeal(await api("/api/deals/"+id))}catch(err){alert(err.message)}}
+function showDeal(d){state.deal=d;let me=d.role;let actions="";
+if(d.status==="waiting_buyer"&&me==="creator") actions=`<div class="notice">🟡 Ожидаем покупателя. Передай код сделки второму участнику.</div>`;
+if(d.status==="active"&&me==="buyer") actions=`<div class="notice">🟠 Ожидаем оплату.</div><div class="actions"><button onclick="payment()">💳 Я оплатил</button></div>`;
+if(d.status==="payment_review"&&me==="buyer") actions=`<div class="notice">🟣 Подтверждение оплаты отправлено. Ожидаем проверку.</div>`;
+if(d.status==="payment_confirmed"&&me==="creator") actions=`<div class="notice">🔵 Оплата подтверждена. Передай NFT покупателю.</div><div class="actions"><button onclick="sellerSent()">🎁 NFT передан</button></div>`;
+if(d.status==="buyer_confirmation"&&me==="buyer") actions=`<div class="notice">🟦 NFT отмечен как переданный. Подтверди получение.</div><div class="actions"><button onclick="received()">✅ NFT получил</button></div>`;
+if(d.status==="payout_pending"&&me==="creator") actions=`<div class="notice">🟠 Покупатель подтвердил получение. Ожидаем выплату.</div>`;
+if(d.status==="completed") actions=`<div class="notice ok">🟢 Сделка завершена.</div>`;
+if(d.status==="cancelled") actions=`<div class="notice error">🔴 Сделка отменена.</div>`;
+screen(`<button class="back" onclick="home()">← На главную</button><div class="section-title">💎 Сделка #${d.id}</div><div class="deal"><div><b>Статус:</b> ${h(d.status_text)}</div><div><b>Сумма:</b> ${h(d.price)} ${h(d.currency)}</div><div><b>NFT:</b> ${h(d.nft)}</div><div class="muted" style="margin-top:8px">Роль: ${me==="creator"?"продавец":"покупатель"}</div></div>${d.code?`<div class="code">${h(d.code)}</div>`:""}<div class="deal"><b>🔗 NFT-ссылки</b><div class="links">${(d.nft_links||"").split("\\n").map(h).join("<br>")||"—"}</div></div>${actions}<div class="actions"><button class="danger" onclick="cancelDeal(${d.id})">❌ Отменить сделку</button></div>`)}
+async function payment(){screen(`<button class="back" onclick="loadDeal(${state.deal.id})">← Назад</button><div class="section-title">💳 Подтверждение оплаты</div><form class="form" onsubmit="sendPayment(event)"><div class="notice">Переведи ${h(state.deal.price)} ${h(state.deal.currency)} по реквизитам, которые предоставлены продавцу/сервису, затем приложи подтверждение.</div><div class="field"><label>Текст подтверждения</label><textarea id="proof" placeholder="Например: оплатил"></textarea></div><button type="submit">📨 Отправить подтверждение</button></form>`)}
+async function sendPayment(e){e.preventDefault();try{const d=await api(`/api/deals/${state.deal.id}/payment-proof`,{method:"POST",body:JSON.stringify({proof:document.getElementById("proof").value.trim()})});showDeal(d)}catch(err){alert(err.message)}}
+async function sellerSent(){try{showDeal(await api(`/api/deals/${state.deal.id}/seller-sent`,{method:"POST"}))}catch(err){alert(err.message)}}
+async function received(){try{showDeal(await api(`/api/deals/${state.deal.id}/received`,{method:"POST"}))}catch(err){alert(err.message)}}
+async function cancelDeal(id){if(!confirm("Отменить сделку?"))return;try{showDeal(await api(`/api/deals/${id}/cancel`,{method:"POST"}))}catch(err){alert(err.message)}}
+home();
+</script>
+</body></html>
